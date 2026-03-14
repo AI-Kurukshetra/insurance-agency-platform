@@ -5,8 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { QuoteRow, updateQuoteAction } from "@/lib/actions/quotes";
+import { lineOfBusinessEnum } from "@/lib/validations/policy";
 import {
-  lineOfBusinessEnum,
   quoteSchema,
   quoteStatusEnum,
   quoteUpdateSchema,
