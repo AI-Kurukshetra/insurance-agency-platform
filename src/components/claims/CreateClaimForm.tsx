@@ -1,23 +1,21 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { createClaimAction } from "@/lib/actions/claims";
-import {
-  claimSchema,
-  claimStatusEnum,
-  type ClaimInput,
-} from "@/lib/validations/claim";
+import { claimSchema, claimStatusEnum, type ClaimInput } from "@/lib/validations/claim";
 import { FormError } from "@/components/ui/FormError";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const statusOptions = claimStatusEnum.options;
 
 export function CreateClaimForm() {
   const router = useRouter();
   const today = new Date().toISOString().split("T")[0];
-  const form = useForm<ClaimInput>({
+  type ClaimFormValues = z.input<typeof claimSchema>;
+  const form = useForm<ClaimFormValues>({
     resolver: zodResolver(claimSchema),
     defaultValues: {
       claim_number: "",
@@ -37,8 +35,9 @@ export function CreateClaimForm() {
     },
   });
 
-  async function onSubmit(values: ClaimInput) {
-    const result = await createClaimAction(values);
+  async function onSubmit(values: ClaimFormValues) {
+    const payload = claimSchema.parse(values) satisfies ClaimInput;
+    const result = await createClaimAction(payload);
     if (!result.success) {
       toast.error(result.error ?? "Unable to save claim");
       form.setError("root", { message: result.error });
