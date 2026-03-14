@@ -1,21 +1,10 @@
-# Insurance Agency Platform
+# 🏢 Insurance Agency Platform
 
-Production-oriented insurance agency management system built with Next.js, Supabase, Vercel, and TypeScript.
+## What it does
+Insurance Agency Platform is a full-stack agency management system for independent insurance brokers. It centralises client management, policy tracking, quote generation, claims handling, commission reporting, document storage, task management, and lead pipeline in a single modern web app — giving agents everything they need to run their agency efficiently.
 
-## Planned Modules
-
-- Authentication
-- Dashboard
-- Clients
-- Policies
-- Quotes
-- Commissions
-- Documents
-- Claims
-- Tasks and Calendar
-- Leads
-- Certificates
-- Reports
+## What it is an alternative to
+This is an open-source alternative to **Applied Epic** (Applied Systems) — the industry-leading insurance agency management system used by independent brokers worldwide. Other commercial products it replaces include HawkSoft, EZLynx, and Agency Matrix.
 
 ## Stack
 

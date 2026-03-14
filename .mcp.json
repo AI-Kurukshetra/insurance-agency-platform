@@ -4,5 +4,14 @@
       "command": "npx",
       "args": ["-y", "next-devtools-mcp@latest"]
     }
-  }
+  },
+   "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--access-token",
+        "${SUPABASE_ACCESS_TOKEN}"
+      ]
+    }
 }

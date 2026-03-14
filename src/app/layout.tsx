@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans, Space_Grotesk } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -29,6 +30,7 @@ export default function RootLayout({
         className={`${dmSans.variable} ${spaceGrotesk.variable} bg-slate-50 text-slate-950 antialiased`}
       >
         {children}
+        <Toaster />
       </body>
     </html>
   );
