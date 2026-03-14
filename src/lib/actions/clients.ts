@@ -25,11 +25,11 @@ export type ClientFilter = {
   status?: z.infer<typeof clientStatusEnum>;
 };
 
-export async function fetchClients(options?: ClientFilter) {
+export async function fetchClients(options?: ClientFilter): Promise<ClientRow[]> {
   const supabase = await createClient();
   let query = supabase
     .from("clients")
-    .select("id, client_id, type, first_name, last_name, business_name, email, status")
+    .select("*")
     .order("created_at", { ascending: false })
     .limit(200);
 
@@ -54,7 +54,7 @@ export async function fetchClients(options?: ClientFilter) {
     throw new Error(error.message);
   }
 
-  return data ?? [];
+  return (data ?? []) as ClientRow[];
 }
 
 const uuidSchema = z.string().uuid("Invalid client ID");
@@ -95,13 +95,13 @@ export async function createClientAction(input: unknown): Promise<ActionResponse
   const payload = {
     ...parsed.data,
     client_id: clientId,
-    phone: parsed.data.phone ? parsed.data.phone : null,
-    address: parsed.data.address ? parsed.data.address : null,
-    city: parsed.data.city ? parsed.data.city : null,
-    state: parsed.data.state ? parsed.data.state : null,
-    zip: parsed.data.zip ? parsed.data.zip : null,
-    date_of_birth: parsed.data.date_of_birth || null,
-    notes: parsed.data.notes ? parsed.data.notes : null,
+    phone: parsed.data.phone ?? undefined,
+    address: parsed.data.address ?? undefined,
+    city: parsed.data.city ?? undefined,
+    state: parsed.data.state ?? undefined,
+    zip: parsed.data.zip ?? undefined,
+    date_of_birth: parsed.data.date_of_birth ?? undefined,
+    notes: parsed.data.notes ?? undefined,
   } satisfies Omit<ClientInput, "id">;
   const { error } = await supabase.from("clients").insert(payload);
 
@@ -123,16 +123,16 @@ export async function updateClientAction(input: unknown): Promise<ActionResponse
   const { id, ...rest } = parsed.data;
   const payload = {
     ...rest,
-    first_name: rest.first_name || null,
-    last_name: rest.last_name || null,
-    business_name: rest.business_name || null,
-    phone: rest.phone || null,
-    address: rest.address || null,
-    city: rest.city || null,
-    state: rest.state || null,
-    zip: rest.zip || null,
-    date_of_birth: rest.date_of_birth || null,
-    notes: rest.notes || null,
+    first_name: rest.first_name ?? undefined,
+    last_name: rest.last_name ?? undefined,
+    business_name: rest.business_name ?? undefined,
+    phone: rest.phone ?? undefined,
+    address: rest.address ?? undefined,
+    city: rest.city ?? undefined,
+    state: rest.state ?? undefined,
+    zip: rest.zip ?? undefined,
+    date_of_birth: rest.date_of_birth ?? undefined,
+    notes: rest.notes ?? undefined,
   } satisfies Omit<ClientInput, "id">;
 
   const supabase = await createClient();
