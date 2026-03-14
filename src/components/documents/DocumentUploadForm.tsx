@@ -2,13 +2,14 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
 import { createDocumentAction } from "@/lib/actions/documents";
 import {
   documentSchema,
   documentTypeEnum,
   type DocumentFormValues,
+  type DocumentInput,
 } from "@/lib/validations/document";
 import { FormError } from "@/components/ui/FormError";
 
@@ -16,8 +17,9 @@ const docTypeOptions = documentTypeEnum.options;
 
 export function DocumentUploadForm() {
   const router = useRouter();
+  const resolver = zodResolver(documentSchema) as unknown as Resolver<DocumentFormValues>;
   const form = useForm<DocumentFormValues>({
-    resolver: zodResolver(documentSchema),
+    resolver,
     defaultValues: {
       name: "",
       type: "policy",
@@ -34,8 +36,9 @@ export function DocumentUploadForm() {
     },
   });
 
-  async function onSubmit(values: DocumentInput) {
-    const result = await createDocumentAction(values);
+  async function onSubmit(values: DocumentFormValues) {
+    const payload = documentSchema.parse(values) satisfies DocumentInput;
+    const result = await createDocumentAction(payload);
     if (!result.success) {
       toast.error(result.error ?? "Unable to upload document");
       form.setError("root", { message: result.error });

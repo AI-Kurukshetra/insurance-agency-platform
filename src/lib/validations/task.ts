@@ -22,7 +22,7 @@ const preprocessDate = (message: string) =>
       return new Date(value);
     }
     return value;
-  }, z.date({ invalid_type_error: message }));
+  }, z.date());
 
 const preprocessUuidOptional = (message: string) =>
   z.string().uuid(message).optional().or(z.literal(""));

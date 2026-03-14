@@ -29,7 +29,7 @@ const preprocessNumber = (message: string) =>
       return Number.isNaN(parsed) ? value : parsed;
     }
     return value;
-  }, z.number({ invalid_type_error: message }).nonnegative("Must be zero or more").optional());
+  }, z.number().nonnegative("Must be zero or more").optional());
 
 export const leadSchema = z.object({
   lead_id: z.string().max(30).optional().or(z.literal("")),

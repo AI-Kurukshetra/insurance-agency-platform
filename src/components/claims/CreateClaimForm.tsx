@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, type SubmitHandler, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
 import { createClaimAction } from "@/lib/actions/claims";
 import { claimSchema, claimStatusEnum, type ClaimInput } from "@/lib/validations/claim";
@@ -15,8 +15,9 @@ export function CreateClaimForm() {
   const router = useRouter();
   const today = new Date().toISOString().split("T")[0];
   type ClaimFormValues = z.input<typeof claimSchema>;
+  const resolver = zodResolver(claimSchema) as unknown as Resolver<ClaimFormValues>;
   const form = useForm<ClaimFormValues>({
-    resolver: zodResolver(claimSchema),
+    resolver,
     defaultValues: {
       claim_number: "",
       policy_id: "",
@@ -35,7 +36,7 @@ export function CreateClaimForm() {
     },
   });
 
-  async function onSubmit(values: ClaimFormValues) {
+  const onSubmit: SubmitHandler<ClaimFormValues> = async (values) => {
     const payload = claimSchema.parse(values) satisfies ClaimInput;
     const result = await createClaimAction(payload);
     if (!result.success) {

@@ -10,14 +10,14 @@ export const commissionSchema = z.object({
   type: commissionTypeEnum,
   status: commissionStatusEnum,
   commission_rate: z
-    .number({ invalid_type_error: "Commission rate is required" })
+    .number()
     .min(0, "Rate must be zero or more")
     .max(100, "Rate must be 100 or less"),
   gross_premium: z
-    .number({ invalid_type_error: "Gross premium is required" })
+    .number()
     .nonnegative("Gross premium must be zero or more"),
   commission_amount: z
-    .number({ invalid_type_error: "Commission amount is required" })
+    .number()
     .nonnegative("Commission amount must be zero or more"),
   paid_date: z.preprocess((value) => {
     if (typeof value === "string" && value) return new Date(value);

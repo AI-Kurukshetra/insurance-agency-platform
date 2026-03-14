@@ -9,7 +9,7 @@ const preprocessDate = (message: string) =>
   z.preprocess((value) => {
     if (typeof value === "string" && value) return new Date(value);
     return value;
-  }, z.date({ invalid_type_error: message }));
+  }, z.date());
 
 export const certificateSchema = z.object({
   certificate_number: z

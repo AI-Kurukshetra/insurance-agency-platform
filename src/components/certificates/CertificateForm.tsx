@@ -1,8 +1,9 @@
 "use client";
 
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
 import { createCertificateAction } from "@/lib/actions/certificates";
 import {
@@ -17,8 +18,10 @@ const statusOptions = certificateStatusEnum.options;
 export function CertificateForm() {
   const router = useRouter();
   const today = new Date().toISOString().split("T")[0];
-  const form = useForm<CertificateInput>({
-    resolver: zodResolver(certificateSchema),
+  type CertificateFormValues = z.input<typeof certificateSchema>;
+  const resolver = zodResolver(certificateSchema) as unknown as Resolver<CertificateFormValues>;
+  const form = useForm<CertificateFormValues>({
+    resolver,
     defaultValues: {
       certificate_number: "",
       policy_id: "",
@@ -33,7 +36,7 @@ export function CertificateForm() {
     },
   });
 
-  async function onSubmit(values: CertificateInput) {
+  async function onSubmit(values: CertificateFormValues) {
     const result = await createCertificateAction(values);
     if (!result.success) {
       toast.error(result.error ?? "Unable to issue certificate");

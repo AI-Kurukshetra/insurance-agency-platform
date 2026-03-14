@@ -1,17 +1,20 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, type SubmitHandler, type Resolver } from "react-hook-form";
 import { createPolicyAction } from "@/lib/actions/policies";
 import { lineOfBusinessEnum, policySchema, policyStatusEnum, type PolicyInput } from "@/lib/validations/policy";
 import { toast } from "sonner";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 const lineOptions = lineOfBusinessEnum.options;
 const statusOptions = policyStatusEnum.options;
 
 export function CreatePolicyForm() {
-  const form = useForm<PolicyInput>({
-    resolver: zodResolver(policySchema),
+  type PolicyFormValues = z.input<typeof policySchema>;
+  const resolver = zodResolver(policySchema) as unknown as Resolver<PolicyFormValues>;
+  const form = useForm<PolicyFormValues>({
+    resolver,
     defaultValues: {
       policy_number: "",
       client_id: "",
@@ -29,8 +32,9 @@ export function CreatePolicyForm() {
     },
   });
 
-  async function onSubmit(values: PolicyInput) {
-    const result = await createPolicyAction(values);
+  async function onSubmit(values: PolicyFormValues) {
+    const payload = policySchema.parse(values) satisfies PolicyInput;
+    const result = await createPolicyAction(payload);
     if (!result.success) {
       toast.error(result.error ?? "Unable to create policy");
       form.setError("root", { message: result.error });

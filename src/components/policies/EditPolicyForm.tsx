@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { useForm, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
 import { PolicyRow, updatePolicyAction } from "@/lib/actions/policies";
 import {
@@ -11,6 +11,7 @@ import {
   policyUpdateSchema,
   type PolicyUpdateInput,
 } from "@/lib/validations/policy";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const lineOptions = lineOfBusinessEnum.options;
 const statusOptions = policyStatusEnum.options;
@@ -25,17 +26,30 @@ function formatDateInput(value: string) {
 
 export function EditPolicyForm({ policy }: Props) {
   const router = useRouter();
-  const form = useForm<PolicyUpdateInput>({
-    resolver: zodResolver(policyUpdateSchema),
-    defaultValues: {
-      ...policy,
-      effective_date: formatDateInput(policy.effective_date),
-      expiration_date: formatDateInput(policy.expiration_date),
-    },
+  type PolicyUpdateFormValues = z.input<typeof policyUpdateSchema>;
+  const defaultValues: PolicyUpdateFormValues = {
+    id: policy.id,
+    policy_number: policy.policy_number ?? "",
+    client_id: policy.client_id,
+    carrier_id: policy.carrier_id,
+    line_of_business: lineOfBusinessEnum.parse(policy.line_of_business),
+    status: policyStatusEnum.parse(policy.status),
+    effective_date: formatDateInput(policy.effective_date),
+    expiration_date: formatDateInput(policy.expiration_date),
+    premium: policy.premium,
+    coverage_limit: policy.coverage_limit ?? undefined,
+    deductible: policy.deductible ?? undefined,
+    description: policy.description ?? "",
+  };
+  const resolver = zodResolver(policyUpdateSchema) as unknown as Resolver<PolicyUpdateFormValues>;
+  const form = useForm<PolicyUpdateFormValues>({
+    resolver,
+    defaultValues,
   });
 
-  async function onSubmit(values: PolicyUpdateInput) {
-    const result = await updatePolicyAction(values);
+  async function onSubmit(values: PolicyUpdateFormValues) {
+    const payload = policyUpdateSchema.parse(values) satisfies PolicyUpdateInput;
+    const result = await updatePolicyAction(payload);
     if (!result.success) {
       toast.error(result.error ?? "Unable to update policy");
       form.setError("root", { message: result.error });

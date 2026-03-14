@@ -1,8 +1,9 @@
 "use client";
 
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
 import { createLeadAction } from "@/lib/actions/leads";
 import {
@@ -18,8 +19,10 @@ const sourceOptions = leadSourceEnum.options;
 
 export function LeadForm() {
   const router = useRouter();
-  const form = useForm<LeadInput>({
-    resolver: zodResolver(leadSchema),
+  type LeadFormValues = z.input<typeof leadSchema>;
+  const resolver = zodResolver(leadSchema) as unknown as Resolver<LeadFormValues>;
+  const form = useForm<LeadFormValues>({
+    resolver,
     defaultValues: {
       lead_id: "",
       first_name: "",
@@ -28,14 +31,15 @@ export function LeadForm() {
       phone: "",
       source: "referral",
       stage: "new",
-      interested_in: [],
+      interested_in: "",
       estimated_premium: undefined,
       notes: "",
     },
   });
 
-  async function onSubmit(values: LeadInput) {
-    const result = await createLeadAction(values);
+  async function onSubmit(values: LeadFormValues) {
+    const payload = leadSchema.parse(values) satisfies LeadInput;
+    const result = await createLeadAction(payload);
     if (!result.success) {
       toast.error(result.error ?? "Unable to save lead");
       form.setError("root", { message: result.error });
@@ -50,7 +54,7 @@ export function LeadForm() {
       last_name: "",
       email: "",
       phone: "",
-      interested_in: [],
+      interested_in: "",
       estimated_premium: undefined,
       notes: "",
     });

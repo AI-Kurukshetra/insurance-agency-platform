@@ -1,8 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
 import { QuoteRow, updateQuoteAction } from "@/lib/actions/quotes";
 import { lineOfBusinessEnum } from "@/lib/validations/policy";
@@ -12,6 +11,8 @@ import {
   quoteUpdateSchema,
   type QuoteUpdateInput,
 } from "@/lib/validations/quote";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 const lineOptions = lineOfBusinessEnum.options;
 const statusOptions = quoteStatusEnum.options;
@@ -20,20 +21,34 @@ type Props = {
   quote: QuoteRow;
 };
 
-const formatDateInput = (value: string) => new Date(value).toISOString().split("T")[0];
+const formatDateInput = (value?: string | null) =>
+  value ? new Date(value).toISOString().split("T")[0] : new Date().toISOString().split("T")[0];
 
 export function EditQuoteForm({ quote }: Props) {
   const router = useRouter();
-  const form = useForm<QuoteUpdateInput>({
-    resolver: zodResolver(quoteUpdateSchema),
-    defaultValues: {
-      ...quote,
-      valid_until: formatDateInput(quote.valid_until),
-    },
+  type QuoteUpdateFormValues = z.input<typeof quoteUpdateSchema>;
+  const defaultValues: QuoteUpdateFormValues = {
+    id: quote.id,
+    quote_number: quote.quote_number ?? "",
+    client_id: quote.client_id,
+    carrier_id: quote.carrier_id,
+    line_of_business: lineOfBusinessEnum.parse(quote.line_of_business),
+    status: quoteStatusEnum.parse(quote.status),
+    premium: quote.premium ?? 0,
+    coverage_limit: quote.coverage_limit ?? undefined,
+    deductible: quote.deductible ?? undefined,
+    valid_until: formatDateInput(quote.valid_until),
+    notes: quote.notes ?? "",
+  };
+  const resolver = zodResolver(quoteUpdateSchema) as unknown as Resolver<QuoteUpdateFormValues>;
+  const form = useForm<QuoteUpdateFormValues>({
+    resolver,
+    defaultValues,
   });
 
-  async function onSubmit(values: QuoteUpdateInput) {
-    const result = await updateQuoteAction(values);
+  async function onSubmit(values: QuoteUpdateFormValues) {
+    const payload = quoteUpdateSchema.parse(values) satisfies QuoteUpdateInput;
+    const result = await updateQuoteAction(payload);
     if (!result.success) {
       toast.error(result.error ?? "Unable to update quote");
       form.setError("root", { message: result.error });

@@ -1,8 +1,7 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
 import { createTaskAction } from "@/lib/actions/tasks";
 import {
@@ -13,6 +12,8 @@ import {
   type TaskInput,
 } from "@/lib/validations/task";
 import { FormError } from "@/components/ui/FormError";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 const typeOptions = taskTypeEnum.options;
 const priorityOptions = taskPriorityEnum.options;
@@ -21,8 +22,10 @@ const statusOptions = taskStatusEnum.options;
 export function TaskForm() {
   const router = useRouter();
   const today = new Date().toISOString().split("T")[0];
-  const form = useForm<TaskInput>({
-    resolver: zodResolver(taskSchema),
+  type TaskFormValues = z.input<typeof taskSchema>;
+  const resolver = zodResolver(taskSchema) as unknown as Resolver<TaskFormValues>;
+  const form = useForm<TaskFormValues>({
+    resolver,
     defaultValues: {
       title: "",
       description: "",
@@ -37,8 +40,9 @@ export function TaskForm() {
     },
   });
 
-  async function onSubmit(values: TaskInput) {
-    const result = await createTaskAction(values);
+  async function onSubmit(values: TaskFormValues) {
+    const payload = taskSchema.parse(values) satisfies TaskInput;
+    const result = await createTaskAction(payload);
     if (!result.success) {
       toast.error(result.error ?? "Unable to create task");
       form.setError("root", { message: result.error });

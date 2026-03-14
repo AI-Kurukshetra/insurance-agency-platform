@@ -22,7 +22,7 @@ export const quoteSchema = z.object({
   line_of_business: lineOfBusinessEnum,
   status: quoteStatusEnum,
   premium: z
-    .number({ invalid_type_error: "Premium is required" })
+    .number()
     .nonnegative("Premium must be zero or more"),
   coverage_limit: z.number().nonnegative().optional(),
   deductible: z.number().nonnegative().optional(),

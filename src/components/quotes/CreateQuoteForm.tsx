@@ -1,19 +1,22 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
 import { createQuoteAction } from "@/lib/actions/quotes";
 import { lineOfBusinessEnum } from "@/lib/validations/policy";
 import { quoteSchema, quoteStatusEnum, type QuoteInput } from "@/lib/validations/quote";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 const lineOptions = lineOfBusinessEnum.options;
 const statusOptions = quoteStatusEnum.options;
 
 export function CreateQuoteForm() {
   const today = new Date().toISOString().split("T")[0];
-  const form = useForm<QuoteInput>({
-    resolver: zodResolver(quoteSchema),
+  type QuoteFormValues = z.input<typeof quoteSchema>;
+  const resolver = zodResolver(quoteSchema) as unknown as Resolver<QuoteFormValues>;
+  const form = useForm<QuoteFormValues>({
+    resolver,
     defaultValues: {
       quote_number: "",
       client_id: "",
@@ -28,8 +31,9 @@ export function CreateQuoteForm() {
     },
   });
 
-  async function onSubmit(values: QuoteInput) {
-    const result = await createQuoteAction(values);
+  async function onSubmit(values: QuoteFormValues) {
+    const payload = quoteSchema.parse(values) satisfies QuoteInput;
+    const result = await createQuoteAction(payload);
     if (!result.success) {
       toast.error(result.error ?? "Unable to create quote");
       form.setError("root", { message: result.error });

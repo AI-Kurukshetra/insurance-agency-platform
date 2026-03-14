@@ -23,7 +23,7 @@ const preprocessNumber = (message: string) =>
       return Number.isNaN(parsed) ? value : parsed;
     }
     return value;
-  }, z.number({ invalid_type_error: message }).nonnegative("Must be zero or more"));
+  }, z.number().nonnegative("Must be zero or more"));
 
 const optionalText = (max: number) =>
   z.string().max(max, "Too long").optional().or(z.literal(""));
