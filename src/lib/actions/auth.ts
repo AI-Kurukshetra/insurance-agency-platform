@@ -80,7 +80,10 @@ export async function forgotPasswordAction(
     };
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const defaultHost = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://localhost:3000";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? defaultHost;
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(
     parsed.data.email,
